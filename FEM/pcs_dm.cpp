@@ -1884,7 +1884,7 @@ double CRFProcessDeformation::CaclMaxiumLoadRatio(void)
 					SMat->Calculate_Lame_Constant(elem);
 #endif
 #ifndef RFW_FRACTURE
-					SMat->Calculate_Lame_Constant();
+					SMat->Calculate_Lame_Constant(elem->GetIndex());
 #endif
 					SMat->ElasticConsitutive(fem_dm->Dim(), fem_dm->De);
 					SMat->CalulateCoefficent_DP();
@@ -1895,7 +1895,7 @@ double CRFProcessDeformation::CaclMaxiumLoadRatio(void)
 					SMat->Calculate_Lame_Constant(elem);
 #endif
 #ifndef RFW_FRACTURE
-					SMat->Calculate_Lame_Constant();
+					SMat->Calculate_Lame_Constant(elem->GetIndex());
 #endif
 					SMat->ElasticConsitutive(fem_dm->Dim(), fem_dm->De);
 					Mat = eleV_DM->MatP;

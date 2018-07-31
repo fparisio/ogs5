@@ -1932,7 +1932,7 @@ void CFiniteElementVec::GlobalAssembly_RHS()
 #ifdef RFW_FRACTURE
 				smat->Calculate_Lame_Constant(GetMeshElement());
 #else
-			smat->Calculate_Lame_Constant();
+			smat->Calculate_Lame_Constant(MeshElement->GetIndex());
 #endif
 				//
 				smat->ElasticConsitutive(ele_dim, De);
@@ -2977,7 +2977,7 @@ void CFiniteElementVec::GlobalAssembly_RHS()
 				smat->Calculate_Lame_Constant(MeshElement);
 #endif
 #ifndef RFW_FRACTURE
-				smat->Calculate_Lame_Constant();
+				smat->Calculate_Lame_Constant(MeshElement->GetIndex());
 #endif
 				smat->CalulateCoefficent_DP();
 
@@ -3229,7 +3229,7 @@ void CFiniteElementVec::GlobalAssembly_RHS()
 		}
 
 		// Elastic modulus
-		smat->Calculate_Lame_Constant();
+		smat->Calculate_Lame_Constant(MeshElement->GetIndex());
 
 		smat->ElasticConsitutive(ele_dim, De);
 
