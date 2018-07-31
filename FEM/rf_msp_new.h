@@ -60,6 +60,10 @@ namespace SolidMath
 {
 class Invariants;
 }
+namespace MaterialLib
+{
+class YoungModulusDistribution;
+}
 namespace SolidProp
 {
 typedef Eigen::Matrix<double, 6, 1> KVec;
@@ -97,7 +101,7 @@ public:
 	double getBiotsConstant() const { return biot_const; }
 
 	// Elasticity
-	void Calculate_Lame_Constant();
+	void Calculate_Lame_Constant(const int element_id);
 
 	// For thermal elastic model
 	void ElasticConsitutive(const int Dimension, Math_Group::Matrix* D_e) const;
@@ -176,6 +180,7 @@ private:
 	// Material parameters
 	double PoissonRatio;
 	int Youngs_mode;
+	MaterialLib::YoungModulusDistribution* data_Youngs_distr;
 	int excavation; // 12.2009. WW
 	bool excavated; // 12.2009. To be ..... WW
 	Math_Group::Matrix* data_Youngs;
@@ -353,7 +358,7 @@ private:
 	// RFW, for fracture calc
 	double Get_Youngs_Min_Aperture(CElem* elem);
 #else
-	double Youngs_Modulus(double refence = 0.0);
+	double Youngs_Modulus(const int elment_id, double refence = 0.0);
 #endif
 
 	void CalcYoungs_SVV(const double strain_v);

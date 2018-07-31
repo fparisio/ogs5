@@ -45,6 +45,8 @@
 #include "minkley.h"
 #include "burgers.h"
 
+#include "Material/Solid/Young/YoungModulus.h"
+
 std::vector<SolidProp::CSolidProperties*> msp_vector;
 std::vector<std::string> msp_key_word_vector; // OK
 
@@ -450,6 +452,16 @@ std::ios::pos_type CSolidProperties::Read(std::ifstream* msp_file)
 					data_Youngs = new Matrix(3);
 					in_sd >> (*data_Youngs)(0) >> (*data_Youngs)(1) >> (*data_Youngs)(2);
 					in_sd.clear();
+					break;
+				case 3:
+				{
+					std::string file_name;
+					in_sd >> file_name;
+					file_name = FilePath + file_name;
+					data_Youngs_distr =
+						new MaterialLib::YoungModulusDistribution(
+									file_name, *fem_msh_vector[0]);
+				}
 					break;
 				case 1000: // case 10-13: transverse isotropic linear elasticity (UJG 24.11.2009)
 					// data_Youngs transverse isotropic linear elasticity
@@ -1015,7 +1027,7 @@ Programing:
 04/2005 WW Curve dependency
 **************************************************************************/
 CSolidProperties::CSolidProperties()
-    : data_Youngs(NULL), data_Density(NULL), data_Capacity(NULL), data_Conductivity(NULL), data_Plasticity(NULL),
+    : data_Youngs_distr(NULL), data_Youngs(NULL), data_Density(NULL), data_Capacity(NULL), data_Conductivity(NULL), data_Plasticity(NULL),
       data_Creep(NULL)
 {
 	PoissonRatio = 0.2;
@@ -1138,6 +1150,9 @@ CSolidProperties::~CSolidProperties()
 		delete Crotm; // rotation matrix for matrices: UJG 25.11.2009
 	if (D_tran)
 		delete D_tran; // rotation matrix for matrices: UJG 25.11.2009
+	if (data_Youngs_distr)
+		delete data_Youngs_distr;
+
 	data_Density = NULL;
 	data_Youngs = NULL;
 	data_Plasticity = NULL;
@@ -1644,7 +1659,7 @@ void CSolidProperties::HeatConductivityTensor(const int dim, double* tensor, int
    Programing:
    08/2004 WW Implementation
 **************************************************************************/
-double CSolidProperties::Youngs_Modulus(double reference)
+double CSolidProperties::Youngs_Modulus(const int element_id, double reference)
 {
 	double val = 0.0;
 	switch (Youngs_mode)
@@ -1655,12 +1670,15 @@ double CSolidProperties::Youngs_Modulus(double reference)
 		case 1:
 			val = (*data_Youngs)(0);
 			break;
+		case 3:
+			val = data_Youngs_distr->getYoungsModulus(element_id);
+			break;
 	}
 	return val;
 }
 
 //-------------------------------------------------------------------------
-// Kronecker function
+// Kronecker functionelas
 double CSolidProperties::Kronecker(const int ii, const int jj)
 {
 	double delta = 0.0;
@@ -1973,10 +1991,10 @@ void CSolidProperties::LocalNewtonMinkley(const double dt, const std::vector<dou
    Programing:
    08/2004 WW Implementation
 **************************************************************************/
-void CSolidProperties::Calculate_Lame_Constant()
+void CSolidProperties::Calculate_Lame_Constant(const int element_id)
 {
 	double nv = Poisson_Ratio();
-	E = Youngs_Modulus(); // Constant at present
+	E = Youngs_Modulus(element_id); // Constant at present
 	// WX:1.2013. time dependet
 	if (Time_Dependent_E_nv_mode > 0)
 	{
